@@ -8,7 +8,12 @@ import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.use('TkAgg') #for a pop-up window
 
-sample_size = 100
+#valorile pe care vrem sa le atingem
+lower_bust = 29.222
+higher_profit = 64.723
+
+
+sample_size = 1000
 starting_funds = 10000
 wager_size = 100
 wager_count = 10000
@@ -37,7 +42,8 @@ def doubler_bettor(funds, initial_wager, wager_count, color):
     previous_wager = 'win'
     previous_wager_amount = initial_wager
 
-    global broke_count
+    global doubler_busts
+    global doubler_profits
 
     wager_x = []
     value_y = []
@@ -55,7 +61,8 @@ def doubler_bettor(funds, initial_wager, wager_count, color):
                 wager_x.append(current_wagers)
                 value_y.append(value)
                 if value <= 0:
-                    broke_count = broke_count + 1
+                    doubler_busts = doubler_busts + 1
+                    value = 0
                     break
         elif previous_wager == 'loss':
             #we double the wager
@@ -77,13 +84,17 @@ def doubler_bettor(funds, initial_wager, wager_count, color):
                 wager_x.append(current_wagers)
                 value_y.append(value)
                 if value <= 0:
-                    broke_count = broke_count + 1
+                    doubler_busts = doubler_busts + 1
+                    value = 0
                     break
                 previous_wager = 'loss'
 
         current_wagers = current_wagers+1
 
     plt.plot(wager_x, value_y, color)
+    if value > funds:
+        value = 0
+        doubler_profits = doubler_profits + 1
 
 
 def simple_bettor(funds, initial_wager, wager_count, color):
@@ -98,7 +109,9 @@ def simple_bettor(funds, initial_wager, wager_count, color):
     value = funds #value mai change latter
     wager = initial_wager
     current_wagers = 1
-    global broke_count
+
+    global simple_busts
+    global simple_profits
 
     wager_x = []
     value_y = []
@@ -111,7 +124,8 @@ def simple_bettor(funds, initial_wager, wager_count, color):
         else:
             value = value - wager
             if value <= 0:
-                broke_count = broke_count + 1
+                simple_busts = simple_busts + 1
+                value = 0
                 break
             wager_x.append(current_wagers)
             value_y.append(value)
@@ -119,16 +133,25 @@ def simple_bettor(funds, initial_wager, wager_count, color):
 
     #print("Funds: ", value)
     plt.plot(wager_x, value_y, color)
+    if value > funds:
+        value = 0
+        simple_profits = simple_profits + 1
 
 
-broke_count = 0
+simple_busts = 0.0
+simple_profits = 0.0
+doubler_busts = 0.0
+doubler_profits = 0.0
 
 for i in range(sample_size):
     simple_bettor(starting_funds, wager_size, wager_count, 'k')
     doubler_bettor(starting_funds, wager_size, wager_count, 'c')
 
-# print("broke rate: ", (broke_count/float(j))*100)
-# print("not broke rate: ", 100 - (broke_count/float(j))*100)
+print("Simple Bettor bust chane: ", (simple_busts/sample_size)*100.00)
+print("Doubler Bettor bust chance: ", (doubler_busts/sample_size)*100.00)
+
+print("Simple Bettor profit chane: ", (simple_profits/sample_size)*100.00)
+print("Doubler Bettor profit chance: ", (doubler_profits/sample_size)*100.00)
 
 plt.axhline(0, color = 'r')
 plt.ylabel('Account Value')
